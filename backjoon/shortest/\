@@ -1,0 +1,109 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <climits>
+#include <cstring>
+#include <cmath>
+
+using namespace std;
+
+/* [문제]
+ * 1 ~ N 번 발전소로 가는 중간 전선이 끊어졌다
+ *
+ * 2차원 격자 위에 각 발전소가 있다 
+ * 몇 전선은 보존 돼있긴 하다 
+ * 전선과 발전소 위치가 주어졌을 때 최소한의 전선으로
+ * 1 ~ N번 발전소를 연결해보자
+ *
+ * 안전 이슈로 두 발전소 간 전선 길이가 M을 초과할 순 없다
+ *
+ *
+ * 아니 이건 백트래킹 아닌가?
+ * 일단 2차원으로 접근 안하면 dist 때문에 골통 분쇄 당한다
+ *
+ * */
+struct cmp {
+    bool operator() (pair<int,double> p1, pair<int,double> p2) {
+        return p1.second > p2.second;
+    }
+};
+
+int n, w;
+double m;
+double dist[1001][1001];
+pair<int,int> nodes[1001]; // y, x
+vector<pair<int,double> > edges[1001]; // idx = node_idx, first = end_idx, second = dist
+
+priority_queue<pair<int,double>, vector<pair<int,double> >, cmp> pq;
+void dijkstra(int start) {
+    dist[start][start] = 0;
+    while(!pq.empty()) {
+        int c_idx = pq.top().first;
+        double c_dist = pq.top().second;
+        pq.pop();
+        cout << "My idx is " << c_idx << " and my c_dist is " << c_dist << endl;
+        if (c_idx == n) { cout << floor(c_dist * 1000) << endl; return; }
+
+        for (int i = 0; i < (int)edges[c_idx].size(); i++) {
+            int n_idx = edges[c_idx][i].first;
+            double n_dist = c_dist + edges[c_idx][i].second;
+            cout << n_idx << " and " << n_dist << endl;
+
+            if(n_dist > m) continue;
+            if (dist[c_idx][n_idx] > n_dist) {
+                dist[c_idx][n_idx] = n_dist;
+                cout << "next index is " << n_idx << " and next dist is " << n_dist << endl;
+                pq.push({n_idx, n_dist});
+            }
+        }
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    cin >> n >> w >> m;
+    int y, x;
+    cout << "m is " << m << endl;
+    for (int i = 1; i <= 1000; i++) {
+        for (int j = 1; j <= 1000; j++) {
+            dist[i][j] = INT_MAX;
+        }
+    }
+
+    for (int i = 1; i <= n; i++) {
+        cin >> x >> y;
+        cout << "Node " << i << " is (" << y << ", " << x << "}" << endl;
+        nodes[i] = {y, x};
+    }
+    cout << endl;
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            int as = nodes[i].first; int ae = nodes[i].second;
+            int bs = nodes[j].first; int be = nodes[j].second;
+            double length = sqrt((as - bs) * (as - bs) + (ae - be) * (ae - be));
+            if (length > m) continue;
+
+            edges[i].push_back({j, length});
+            edges[j].push_back({i, length});
+            cout << i << " and " << j << " is connected " << endl;
+        }
+    }
+
+    for (int i = 0; i < w; i++) {
+        cin >> x >> y;
+        cout << x << " and " << y << " is connected " << endl;
+        edges[y].push_back({x, 0});
+        edges[x].push_back({y, 0});
+        dist[y][x] = dist[x][y] = 0;
+        pq.push({x, 0});
+        pq.push({y, 0});
+    }
+    
+    dijkstra(1);
+    cout << dist[1][n] << endl;
+    return 0;
+}
