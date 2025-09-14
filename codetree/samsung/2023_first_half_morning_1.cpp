@@ -146,7 +146,7 @@ void find_defender() {
      not_doing[sy][sx] = false;
 }
 
-bool visited[11][11]; // 맞나 ? 아 ㅅㅂ 나 이런거 안좋아하는데
+bool visited[11][11]; // 맞나 ? 아 나 이런거 안좋아하는데
 int dist[11][11];
 void do_attack() {
     bool isLaser = false;
